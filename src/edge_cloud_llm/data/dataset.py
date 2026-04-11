@@ -77,8 +77,8 @@ def create_dataloaders(
 ) -> tuple[DataLoader, DataLoader, BPETokenizer]:
     tokenizer = load_tokenizer(tokenizer_path)
 
-    train_text = load_wikitext_split_text("train")[:1000]
-    val_text = load_wikitext_split_text("validation")[:100]
+    train_text = load_wikitext_split_text("train")
+    val_text = load_wikitext_split_text("validation")
 
     train_ids = tokenizer.encode(train_text, add_special_tokens=True)
     val_ids = tokenizer.encode(val_text, add_special_tokens=True)

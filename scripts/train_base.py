@@ -103,26 +103,22 @@ from edge_cloud_llm.model import GPT
 
 
 def main():
+
     tokenizer_path = "artifacts/tokenizer/bpe_tokenizer.json"
 
-    # local-friendly config
-    block_size = 32
-    batch_size = 4
-
-    n_layer = 2
-    n_head = 2
-    n_embd = 64
+    block_size = 128
+    batch_size = 16
+    n_layer = 4
+    n_head = 4
+    n_embd = 256
     dropout = 0.1
-
-    # new Part 3 config
+    learning_rate = 3e-4
+    epochs = 30
+    eval_batches = 50
+    output_dir = "outputs/base"
     rope_base = 10000.0
     window_size = None              # keep None for normal training
     attention_sink_tokens = 0       # keep 0 for now
-
-    learning_rate = 3e-4
-    epochs = 5
-    eval_batches = 20
-    output_dir = "outputs/base"
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print("Using device:", device)
