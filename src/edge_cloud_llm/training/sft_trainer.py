@@ -110,7 +110,17 @@ class SFTTrainer(Trainer):
         total_steps = 0
         self.optimizer.zero_grad()
 
-        pbar = tqdm(loader, desc="SFT training", leave=True)
+        # pbar = tqdm(loader, desc="SFT training", leave=True)
+        import os
+
+        disable_tqdm = os.environ.get("KAGGLE_KERNEL_RUN_TYPE") == "Batch"
+
+        pbar = tqdm(
+            loader,
+            "SFT training",
+            leave=False,
+            disable=disable_tqdm
+        )
 
         for step_idx, batch in enumerate(pbar, start=1):
             # batch is an SFTBatch dataclass
@@ -190,7 +200,18 @@ class SFTTrainer(Trainer):
         total_loss  = 0.0
         total_steps = 0
 
-        pbar = tqdm(val_loader, desc="SFT eval", leave=True)
+        import os
+
+        disable_tqdm = os.environ.get("KAGGLE_KERNEL_RUN_TYPE") == "Batch"
+
+        pbar = tqdm(
+            val_loader,
+            "SFT eval",
+            leave=False,
+            disable=disable_tqdm
+        )
+
+        # pbar = tqdm(val_loader, desc="SFT eval", leave=True)
 
         for i, batch in enumerate(pbar, start=1):
             if max_batches is not None and i > max_batches:

@@ -144,7 +144,18 @@ class Trainer:
 
         self.optimizer.zero_grad()
 
-        pbar = tqdm(self.train_loader, desc="Training", leave=True)
+        # pbar = tqdm(self.train_loader, desc="Training", leave=True)
+
+        import os
+
+        disable_tqdm = os.environ.get("KAGGLE_KERNEL_RUN_TYPE") == "Batch"
+
+        pbar = tqdm(
+            self.train_loader,
+            "Training",
+            leave=False,
+            disable=disable_tqdm
+        )
 
         for step_idx, (x, y) in enumerate(pbar, start=1):
             x = x.to(self.device)
@@ -194,7 +205,18 @@ class Trainer:
         total_loss = 0.0
         total_steps = 0
 
-        pbar = tqdm(self.val_loader, desc="Validation", leave=True)
+        # pbar = tqdm(self.val_loader, desc="Validation", leave=True)
+
+        import os
+
+        disable_tqdm = os.environ.get("KAGGLE_KERNEL_RUN_TYPE") == "Batch"
+
+        pbar = tqdm(
+            self.val_loader,
+            "Validation",
+            leave=False,
+            disable=disable_tqdm
+        )
 
         for batch_idx, (x, y) in enumerate(pbar, start=1):
             if max_batches is not None and batch_idx > max_batches:
