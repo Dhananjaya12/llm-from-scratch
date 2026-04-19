@@ -141,20 +141,20 @@ class SFTConfig:
 #
 # ── Kaggle / fast (CPU or small GPU, whole pipeline in minutes) ────────────
 
-MODEL = ModelConfig(n_embd=64,  n_head=2, n_layer=2, block_size=64,  dropout=0.1)
-DATA  = DataConfig( train_chars=5_000, val_chars=500, sft_max_examples=500)
-BASE  = BaseTrainConfig(epochs=1, batch_size=4, grad_accum_steps=1,
-                        warmup_steps=20, eval_batches=5)
-SFT   = SFTConfig(  epochs=2, batch_size=2, grad_accum_steps=1,
-                    warmup_steps=10, curriculum_stages=[64, 64, 128, 128], lora_rank=4)
+# MODEL = ModelConfig(n_embd=64,  n_head=2, n_layer=2, block_size=64,  dropout=0.1)
+# DATA  = DataConfig( train_chars=5_000, val_chars=500, sft_max_examples=500)
+# BASE  = BaseTrainConfig(epochs=1, batch_size=4, grad_accum_steps=1,
+#                         warmup_steps=20, eval_batches=5)
+# SFT   = SFTConfig(  epochs=2, batch_size=2, grad_accum_steps=1,
+#                     warmup_steps=10, curriculum_stages=[64, 64, 128, 128], lora_rank=4)
 
 # ── Full training (Kaggle T4/P100, hours) ─────────────────────────────────
-# MODEL = ModelConfig(n_embd=128, n_head=4, n_layer=4, block_size=128, dropout=0.1)
-# DATA  = DataConfig( train_chars=None, val_chars=None, sft_max_examples=None)
-# BASE  = BaseTrainConfig(epochs=3, batch_size=8, grad_accum_steps=4,
-#                         warmup_steps=100, eval_batches=50)
-# SFT   = SFTConfig(  epochs=3, batch_size=4, grad_accum_steps=4,
-#                     warmup_steps=50, curriculum_stages=[128, 256, 512, 1024], lora_rank=8)
+MODEL = ModelConfig(n_embd=128, n_head=4, n_layer=4, block_size=128, dropout=0.1)
+DATA  = DataConfig( train_chars=None, val_chars=None, sft_max_examples=None)
+BASE  = BaseTrainConfig(epochs=3, batch_size=8, grad_accum_steps=4,
+                        warmup_steps=100, eval_batches=50)
+SFT   = SFTConfig(  epochs=3, batch_size=4, grad_accum_steps=4,
+                    warmup_steps=50, curriculum_stages=[128, 256, 512, 1024], lora_rank=8)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
