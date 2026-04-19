@@ -148,14 +148,13 @@ class SFTConfig:
 # SFT   = SFTConfig(  epochs=2, batch_size=2, grad_accum_steps=1,
 #                     warmup_steps=10, curriculum_stages=[64, 64, 128, 128], lora_rank=4)
 
-# ── Full training (Kaggle T4/P100, hours) ─────────────────────────────────
-# ── Kaggle T4 — completes in 3-5 hours ────────────────────────────────────
-MODEL = ModelConfig(n_embd=128, n_head=4, n_layer=4, block_size=128, dropout=0.1)
-DATA  = DataConfig( train_chars=50_000, val_chars=5_000, sft_max_examples=5_000)
-BASE  = BaseTrainConfig(epochs=2, batch_size=8, grad_accum_steps=2,
-                        warmup_steps=50, eval_batches=20)
-SFT   = SFTConfig(  epochs=2, batch_size=4, grad_accum_steps=2,
-                    warmup_steps=20, curriculum_stages=[64, 128, 256, 256], lora_rank=8)
+# ── Kaggle T4 — small model, full data ────────────────────────────────────
+MODEL = ModelConfig(n_embd=128, n_head=4, n_layer=2, block_size=128, dropout=0.1)
+DATA  = DataConfig( train_chars=None, val_chars=None, sft_max_examples=None)
+BASE  = BaseTrainConfig(epochs=3, batch_size=8, grad_accum_steps=4,
+                        warmup_steps=100, eval_batches=50)
+SFT   = SFTConfig(  epochs=3, batch_size=4, grad_accum_steps=4,
+                    warmup_steps=50, curriculum_stages=[128, 256, 512, 1024], lora_rank=8)
 
 # ── Full training (Kaggle T4/P100, hours) ─────────────────────────────────
 MODEL = ModelConfig(n_embd=128, n_head=4, n_layer=4, block_size=128, dropout=0.1)
