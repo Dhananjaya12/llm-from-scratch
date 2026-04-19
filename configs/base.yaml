@@ -1,0 +1,42 @@
+# configs/base.yaml
+# ─────────────────────────────────────────────────────────────────────────────
+# DOCUMENTATION ONLY — not read by any script.
+#
+# All active settings live in:
+#   src/edge_cloud_llm/config.py   (the single source of truth)
+#
+# To change settings: edit the preset block in config.py.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Kaggle / fast preset (active by default in config.py) ────────────────────
+model:
+  n_embd:     64
+  n_head:     2
+  n_layer:    2
+  block_size: 64
+  dropout:    0.1
+  rope_base:  10000.0
+
+data:
+  tokenizer_path: "artifacts/tokenizer/bpe_tokenizer.json"
+  train_chars:    5000    # characters of WikiText-2 to load (None = all)
+  val_chars:      500
+
+training:
+  epochs:           1
+  batch_size:       4
+  grad_accum_steps: 1
+  learning_rate:    3.0e-4
+  weight_decay:     0.01
+  warmup_steps:     20
+  eval_batches:     5
+  use_amp:          true
+  output_dir:       "outputs/base"
+
+# ── Full training preset (comment-swap in config.py to activate) ──────────────
+# model:
+#   n_embd: 128  n_head: 4  n_layer: 4  block_size: 128
+# data:
+#   train_chars: null  val_chars: null
+# training:
+#   epochs: 3  batch_size: 8  grad_accum_steps: 4  warmup_steps: 100

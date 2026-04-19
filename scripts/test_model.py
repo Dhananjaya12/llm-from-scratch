@@ -1,30 +1,25 @@
+"""Quick forward-pass smoke test. Config comes from config.py."""
 import torch
-
-from edge_cloud_llm.model import MiniTransformerLM
+from edge_cloud_llm.config import MODEL, DATA, build_model
+from edge_cloud_llm.data.tokenizer import BPETokenizer
 
 
 def main():
-    vocab_size = 100
-    d_model = 32
-    max_seq_len = 16
-    num_heads = 4
-    num_layers = 2
-    ff_hidden_dim = 64
+    tokenizer = BPETokenizer.from_file(DATA.tokenizer_path)
+    model = build_model(tokenizer.vocab_size)
 
-    model = MiniTransformerLM(
-        vocab_size=vocab_size,
-        d_model=d_model,
-        max_seq_len=max_seq_len,
-        num_heads=num_heads,
-        num_layers=num_layers,
-        ff_hidden_dim=ff_hidden_dim,
-    )
+    n_params = sum(p.numel() for p in model.parameters())
+    print(f"Model params  : {n_params:,}")
+    print(f"Architecture  : n_embd={MODEL.n_embd}, n_head={MODEL.n_head}, "
+          f"n_layer={MODEL.n_layer}, block_size={MODEL.block_size}")
 
-    input_ids = torch.randint(0, vocab_size, (2, 10))
-    logits = model(input_ids)
+    batch = torch.randint(0, tokenizer.vocab_size, (2, MODEL.block_size))
+    logits, loss, _ = model(batch, targets=batch)
 
-    print("Input shape:", input_ids.shape)
-    print("Logits shape:", logits.shape)
+    print(f"Input shape   : {batch.shape}")
+    print(f"Logits shape  : {logits.shape}")
+    print(f"Loss          : {loss.item():.4f}")
+    print("Forward pass OK")
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Optional
 
 import torch
 from torch.utils.data import Dataset, DataLoader
@@ -30,7 +31,6 @@ class NextTokenDataset(Dataset):
     def __getitem__(self, idx: int):
         x = self.token_ids[idx : idx + self.block_size]
         y = self.token_ids[idx + 1 : idx + self.block_size + 1]
-
         return (
             torch.tensor(x, dtype=torch.long),
             torch.tensor(y, dtype=torch.long),
@@ -39,26 +39,13 @@ class NextTokenDataset(Dataset):
 
 def load_wikitext_split_text(split: str) -> str:
     ds = load_dataset("Salesforce/wikitext", "wikitext-2-raw-v1", split=split)
-
-    texts = []
-    for row in ds:
-        text = row["text"]
-        if text and text.strip():
-            texts.append(text)
-
+    texts = [row["text"] for row in ds if row["text"] and row["text"].strip()]
     return "\n".join(texts)
 
 
 def load_wikitext_split_rows(split: str) -> list[str]:
     ds = load_dataset("Salesforce/wikitext", "wikitext-2-raw-v1", split=split)
-
-    rows = []
-    for row in ds:
-        text = row["text"]
-        if text and text.strip():
-            rows.append(text)
-
-    return rows
+    return [row["text"] for row in ds if row["text"] and row["text"].strip()]
 
 
 def build_token_ids(text: str, tokenizer: BPETokenizer) -> list[int]:
@@ -74,32 +61,38 @@ def create_dataloaders(
     block_size: int,
     batch_size: int,
     num_workers: int = 0,
+    train_chars: Optional[int] = 5_000,
+    val_chars:   Optional[int] = 500,
 ) -> tuple[DataLoader, DataLoader, BPETokenizer]:
+    """
+    Build train + val dataloaders from WikiText-2.
+
+    train_chars / val_chars: if set, slices that many *characters* before
+    tokenising (fast iteration).  Pass None to use the full split.
+    """
     tokenizer = load_tokenizer(tokenizer_path)
 
     train_text = load_wikitext_split_text("train")
-    val_text = load_wikitext_split_text("validation")
+    val_text   = load_wikitext_split_text("validation")
+
+    if train_chars is not None:
+        train_text = train_text[:train_chars]
+    if val_chars is not None:
+        val_text = val_text[:val_chars]
 
     train_ids = tokenizer.encode(train_text, add_special_tokens=True)
-    val_ids = tokenizer.encode(val_text, add_special_tokens=True)
+    val_ids   = tokenizer.encode(val_text,   add_special_tokens=True)
 
     train_dataset = NextTokenDataset(train_ids, block_size=block_size)
-    val_dataset = NextTokenDataset(val_ids, block_size=block_size)
+    val_dataset   = NextTokenDataset(val_ids,   block_size=block_size)
 
     train_loader = DataLoader(
-        train_dataset,
-        batch_size=batch_size,
-        shuffle=True,
-        num_workers=num_workers,
-        drop_last=True,
+        train_dataset, batch_size=batch_size, shuffle=True,
+        num_workers=num_workers, drop_last=True,
     )
-
     val_loader = DataLoader(
-        val_dataset,
-        batch_size=batch_size,
-        shuffle=False,
-        num_workers=num_workers,
-        drop_last=True,
+        val_dataset, batch_size=batch_size, shuffle=False,
+        num_workers=num_workers, drop_last=True,
     )
 
     return train_loader, val_loader, tokenizer

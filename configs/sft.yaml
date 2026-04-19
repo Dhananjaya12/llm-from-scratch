@@ -1,47 +1,34 @@
 # configs/sft.yaml
 # ─────────────────────────────────────────────────────────────────────────────
-# Phase 6 – Supervised Fine-Tuning configuration
-# All values mirror the SFTConfig dataclass in src/edge_cloud_llm/config.py.
-# The dataclass is the source of truth; this file documents every knob.
+# DOCUMENTATION ONLY — not read by any script.
+#
+# All active settings live in:
+#   src/edge_cloud_llm/config.py   (the single source of truth)
 # ─────────────────────────────────────────────────────────────────────────────
 
-# ── Data ──────────────────────────────────────────────────────────────────────
-sft_data_path: "artifacts/sft/train.jsonl"
-# Run first:  python scripts/prepare_sft_data.py
+# ── Kaggle / fast preset ──────────────────────────────────────────────────────
+sft:
+  base_checkpoint: "outputs/base/best.pt"
+  output_dir:      "outputs/sft"
 
-# ── Length curriculum ─────────────────────────────────────────────────────────
-# Each value is a max (prompt + response) token length threshold.
-# Stage i is unlocked after epoch i finishes.
-# Add more stages or change the thresholds to suit your GPU memory.
-curriculum_stages: [128, 256, 512, 1024]
+  curriculum_stages: [64, 64, 128, 128]
+  use_context_packing: false
 
-# ── Context packing ───────────────────────────────────────────────────────────
-# Set True to bin multiple short examples per context window.
-# Very useful for datasets where average length << context_length.
-use_context_packing: false
-context_length: 1024   # also acts as SFTCollator max_length
+  use_lora:    true
+  lora_rank:   4
+  lora_alpha:  8.0
+  lora_dropout: 0.05
+  lora_target_modules: ["qkv"]
+  merge_weights_after_training: true
 
-# ── LoRA ──────────────────────────────────────────────────────────────────────
-use_lora: true
-lora_rank: 8              # try 4 (lowest), 8 (default), 16, 32 for more capacity
-lora_alpha: 16.0          # scaling = alpha / rank; set to rank*2 as a rule of thumb
-lora_dropout: 0.05
-lora_target_modules:      # linear layer name-suffixes to replace
-  - "qkv"                 # your GPT fuses Q/K/V into one matrix called "qkv"
-  # - "proj"              # output projection in each attention block
-merge_weights_after_training: true
+  epochs:           2
+  batch_size:       2
+  grad_accum_steps: 1
+  learning_rate:    2.0e-4
+  weight_decay:     0.01
+  warmup_steps:     10
+  eval_batches:     5
+  use_amp:          true
 
-# ── Optimiser ─────────────────────────────────────────────────────────────────
-learning_rate: 2.0e-4     # higher than pre-training LR is fine for LoRA
-weight_decay: 0.01
-warmup_steps: 50
-epochs: 3                 # one curriculum stage per epoch
-batch_size: 4
-grad_accum_steps: 4       # effective batch = 4 × 4 = 16
-use_amp: true
-gradient_clip: 1.0
-
-# ── Checkpoints ───────────────────────────────────────────────────────────────
-base_checkpoint: "outputs/base/best.pt"
-output_dir: "outputs/sft"
-eval_batches: 50
+# NOTE: model architecture (n_embd, n_layer etc.) is shared with base training
+# and lives under [model] in base.yaml / ModelConfig in config.py.
