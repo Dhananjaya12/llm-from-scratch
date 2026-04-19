@@ -151,7 +151,7 @@ class SFTConfig:
 # ── Kaggle T4 — small model, full data ────────────────────────────────────
 # ── Kaggle T4 — reduced data, small model ─────────────────────────────────
 MODEL = ModelConfig(n_embd=128, n_head=4, n_layer=2, block_size=128, dropout=0.1)
-DATA  = DataConfig( train_chars=5000_000, val_chars=500_000, sft_max_examples=None)
+DATA  = DataConfig( train_chars=3000_000, val_chars=300_000, sft_max_examples=None)
 BASE  = BaseTrainConfig(epochs=3, batch_size=8, grad_accum_steps=4,
                         warmup_steps=100, eval_batches=50)
 SFT   = SFTConfig(  epochs=3, batch_size=4, grad_accum_steps=4,
