@@ -81,7 +81,28 @@ def main():
         print(f"Resumed from {BASE.resume_from}, starting at epoch {start_epoch}")
 
     # ── Training loop ─────────────────────────────────────────────────────────
+    # best_val_loss = float("inf")
+
+    # for epoch in range(start_epoch, BASE.epochs + 1):
+    #     print(f"\n── Epoch {epoch}/{BASE.epochs} ──")
+    #     train_loss = trainer.train_epoch()
+    #     val_loss   = trainer.evaluate(max_batches=BASE.eval_batches)
+
+    #     trainer.log_metrics(epoch, train_loss, val_loss)
+    #     trainer.save_checkpoint(f"epoch_{epoch}.pt", epoch=epoch)
+
+    #     print(f"  train={train_loss:.4f}  val={val_loss:.4f}  "
+    #           f"lr={optimizer.param_groups[0]['lr']:.2e}")
+
+    #     if val_loss < best_val_loss:
+    #         best_val_loss = val_loss
+    #         trainer.save_checkpoint("best.pt", epoch=epoch)
+    #         print("  → best checkpoint saved")
+
+    # in the training loop, replace the existing loop with this:
     best_val_loss = float("inf")
+    patience      = 2        # stop if val loss doesn't improve for 2 epochs in a row
+    no_improve    = 0
 
     for epoch in range(start_epoch, BASE.epochs + 1):
         print(f"\n── Epoch {epoch}/{BASE.epochs} ──")
@@ -91,13 +112,21 @@ def main():
         trainer.log_metrics(epoch, train_loss, val_loss)
         trainer.save_checkpoint(f"epoch_{epoch}.pt", epoch=epoch)
 
+        gap = val_loss - train_loss
         print(f"  train={train_loss:.4f}  val={val_loss:.4f}  "
-              f"lr={optimizer.param_groups[0]['lr']:.2e}")
+            f"gap={gap:.4f}  lr={optimizer.param_groups[0]['lr']:.2e}")
 
         if val_loss < best_val_loss:
             best_val_loss = val_loss
+            no_improve    = 0
             trainer.save_checkpoint("best.pt", epoch=epoch)
             print("  → best checkpoint saved")
+        else:
+            no_improve += 1
+            print(f"  → no improvement ({no_improve}/{patience})")
+            if no_improve >= patience:
+                print(f"  → early stopping at epoch {epoch}")
+                break
 
     print(f"\nDone. Best val loss: {best_val_loss:.4f}")
     print(f"Log: {BASE.output_dir}/training_log.csv")

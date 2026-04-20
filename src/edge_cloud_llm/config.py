@@ -150,12 +150,26 @@ class SFTConfig:
 
 # ── Kaggle T4 — small model, full data ────────────────────────────────────
 # ── Kaggle T4 — reduced data, small model ─────────────────────────────────
-MODEL = ModelConfig(n_embd=128, n_head=4, n_layer=4, block_size=128, dropout=0.1)
-DATA  = DataConfig( train_chars=5000_000, val_chars=500_000, sft_max_examples=None)
-BASE  = BaseTrainConfig(epochs=3, batch_size=8, grad_accum_steps=4,
-                        warmup_steps=100, eval_batches=50)
-SFT   = SFTConfig(  epochs=3, batch_size=4, grad_accum_steps=4,
-                    warmup_steps=50, curriculum_stages=[128, 256, 512, 1024], lora_rank=8)
+MODEL = ModelConfig(n_embd=128, n_head=4, n_layer=4, block_size=128, dropout=0.2)
+DATA  = DataConfig( train_chars=1_000_000, val_chars=100_000, sft_max_examples=5000)
+BASE  = BaseTrainConfig(
+    epochs           = 5,
+    batch_size       = 8,
+    grad_accum_steps = 4,
+    warmup_steps     = 200,
+    eval_batches     = 50,
+    learning_rate    = 3e-4,
+    weight_decay     = 0.01,
+)
+SFT   = SFTConfig(
+    epochs           = 3,
+    batch_size       = 4,
+    grad_accum_steps = 2,
+    warmup_steps     = 100,
+    curriculum_stages= [64, 128, 256, 512],
+    lora_rank        = 8,
+    lora_alpha       = 16.0,
+    learning_rate    = 1e-4)
 
 # ── Full training (Kaggle T4/P100, hours) ─────────────────────────────────
 # MODEL = ModelConfig(n_embd=128, n_head=4, n_layer=4, block_size=128, dropout=0.1)
